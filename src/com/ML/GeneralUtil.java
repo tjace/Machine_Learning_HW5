@@ -5,8 +5,28 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class GeneralUtils {
+class GeneralUtil {
+
+
+    /**
+     * Returns an ArrayList full of the examples from all given files
+     *
+     * @param files the files to read for the Examples
+     * @return an ArrayList full of the examples from all given files
+     */
+    static ArrayList<Example> readExamples(String[] files) {
+        ArrayList<Example> ret = new ArrayList<>();
+
+        for (String file : files) {
+            ArrayList<Example> part = readExamples(file);
+            ret.addAll(part);
+        }
+
+        return ret;
+    }
+
 
     /**
      * Creates an ArrayList full of examples, as read in from a given file.
@@ -49,6 +69,9 @@ public class GeneralUtils {
         return ret;
     }
 
+    static Double smallRandom() {
+        return ThreadLocalRandom.current().nextDouble(0.0, 0.01);
+    }
 
 
 }
