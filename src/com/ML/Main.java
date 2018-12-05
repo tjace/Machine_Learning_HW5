@@ -2,11 +2,16 @@ package com.ML;
 
 import java.util.ArrayList;
 
-public class Main {
+public class Main
+{
 
     //Hyper parameter choices for SVM
     private static final double[] SVMrates = new double[]{1.0, 0.1, 0.01, 0.001, 0.0001};
     private static final double[] SVMlosses = new double[]{10.0, 1.0, 0.1, 0.01, 0.001, 0.0001};
+
+    //Hyper parameter choices for logistic regression
+    private static final double[] LRrates = new double[]{1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001};
+    private static final double[] LRtradeoffs = new double[]{0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0};
 
     //Test and training data
     private static final String trainFile = "src/data/train.liblinear";
@@ -20,22 +25,31 @@ public class Main {
     /**
      * Here we go, the main shebang.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         //
         // simple stochastic sub-gradient descent version algorithm SVM
         //
         simpleStochastic();
+
+        //
+        //Logistic Regression classifier created with stochastic gradient descent
+        //
         logisticRegression();
 
     }
 
     /**
      * Run simple stochastic SVM with sub-gradients:
-     *
+     * <p>
      * Find best parameters via cross validation,
      * then use them to learn weights on a training file and test on a test file.
      */
-    private static void simpleStochastic() {
+    private static void simpleStochastic()
+    {
+        //Clear out the static set of keys stored by Examples class
+        Example.resetAllKeys();
+
         //First, cross validate for the best hyper-params
         SVMParams params = SimpleStochUtil.SVMCrossValidate(crosses, SVMrates, SVMlosses);
 
@@ -59,14 +73,25 @@ public class Main {
 
     private static void logisticRegression()
     {
-        //First, cross validate for the best hyper params
+        //Clear out the static set of keys stored by Weights class
+        Example.resetAllKeys();
 
+        //First, cross validate for the best hyper params
+        LRParams params = LogisticRegressionUtil.LRCrossValidate(crosses, LRrates, LRtradeoffs);
 
         //With the best params, train a new weightset on the .train file 20x
-
+        ArrayList<Example> ex = GeneralUtil.readExamples(trainFile);
+        Weight weights = LogisticRegressionUtil.LREpochs(4, ex, params.getLearnRate(), params.getTradeoff());
 
         //Then test for F1-score on the .test file
+        FScore score = LogisticRegressionUtil.testFScore(weights, testFile);
 
         //Finally, print the result.
+        System.out.println("\n~~~~~~~~~~ RESULTS - Logistic Regression ~~~~~~~~~~");
+        System.out.println("Best rate " + params.getLearnRate()
+                                   + " + tradeoff " + params.getTradeoff() + " has values vs test:"
+                                   + "\nprecision: " + score.getPrecision()
+                                   + "\nrecall: " + score.getRecall()
+                                   + "\nfScore: " + score.getfScore());
     }
 }
