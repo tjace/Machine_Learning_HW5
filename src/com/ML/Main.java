@@ -25,9 +25,16 @@ public class Main {
         // simple stochastic sub-gradient descent version algorithm SVM
         //
         simpleStochastic();
+        logisticRegression();
 
     }
 
+    /**
+     * Run simple stochastic SVM with sub-gradients:
+     *
+     * Find best parameters via cross validation,
+     * then use them to learn weights on a training file and test on a test file.
+     */
     private static void simpleStochastic() {
         //First, cross validate for the best hyper-params
         SVMParams params = SimpleStochUtil.SVMCrossValidate(crosses, SVMrates, SVMlosses);
@@ -36,9 +43,10 @@ public class Main {
         ArrayList<Example> ex = GeneralUtil.readExamples(trainFile);
         Weight weights = SimpleStochUtil.stochEpochs(20, ex, params.getLearnRate(), params.getLossTradeoff());
 
-        //then test error on the .test file.
+        //then test for F1-score on the .test file.
         FScore score = SimpleStochUtil.testFScore(weights, testFile);
 
+        //Finally, print the result.
         System.out.println("\n~~~~~~~~~~ RESULTS - SVM ~~~~~~~~~~");
         System.out.println("Best rate " + params.getLearnRate()
                                    + " + loss " + params.getLossTradeoff() + " has values vs test:"
@@ -47,5 +55,18 @@ public class Main {
                                    + "\nfScore: " + score.getfScore());
 
 
+    }
+
+    private static void logisticRegression()
+    {
+        //First, cross validate for the best hyper params
+
+
+        //With the best params, train a new weightset on the .train file 20x
+
+
+        //Then test for F1-score on the .test file
+
+        //Finally, print the result.
     }
 }
