@@ -14,7 +14,7 @@ public class Main
     private static final double[] LRtradeoffs = new double[]{0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0};
 
     //Hyper parameter choices for Naive Bayes
-    private static final double[] NBsmoothings = new double []{2.0, 1.5, 1.0, 0.5};
+    private static final double[] bayesSmoothings = new double[]{2.0, 1.5, 1.0, 0.5};
 
     //Test and training data
     private static final String trainFile = "src/data/train.liblinear";
@@ -33,18 +33,18 @@ public class Main
         //
         // simple stochastic sub-gradient descent version algorithm SVM
         //
-        simpleStochastic();
+        //simpleStochastic();
 
         //
         //Logistic Regression classifier created with stochastic gradient descent
         //
-        logisticRegression();
-        
+        //logisticRegression();
+
         //
         //Naive Bayes
         //
         naiveBayes();
-    
+
     }
 
 
@@ -56,13 +56,12 @@ public class Main
      */
     private static void simpleStochastic()
     {
-        //Clear out the static set of keys stored by Examples class
-        Example.resetAllKeys();
-
         //First, cross validate for the best hyper-params
         SVMParams params = SimpleStochUtil.SVMCrossValidate(crosses, SVMrates, SVMlosses);
 
         //With best params, train a new weightset on the .train file 20x
+        //A new set is to be trained, so clear out the old.
+        Example.resetAllKeys();
         ArrayList<Example> ex = GeneralUtil.readExamples(trainFile);
         Weight weights = SimpleStochUtil.stochEpochs(20, ex, params.getLearnRate(), params.getLossTradeoff());
 
@@ -82,13 +81,12 @@ public class Main
 
     private static void logisticRegression()
     {
-        //Clear out the static set of keys stored by Weights class
-        Example.resetAllKeys();
-
         //First, cross validate for the best hyper params
         LRParams params = LogisticRegressionUtil.LRCrossValidate(crosses, LRrates, LRtradeoffs);
 
         //With the best params, train a new weightset on the .train file 20x
+        //A new set is to be trained, so clear out the old.
+        Example.resetAllKeys();
         ArrayList<Example> ex = GeneralUtil.readExamples(trainFile);
         Weight weights = LogisticRegressionUtil.LREpochs(4, ex, params.getLearnRate(), params.getTradeoff());
 
@@ -106,7 +104,25 @@ public class Main
 
     private static void naiveBayes()
     {
-        
+        //First, cross validate for the best hyper params
+        BayesParams params = BayesUtil.bayesCrossValidate(crosses, bayesSmoothings);
 
+        //A new set is to be trained, so clear out the old.
+        Example.resetAllKeys();
+        ArrayList<Example> ex = GeneralUtil.readExamples(trainFile);
+
+        //With the best params, train a set of probabilities on the train file
+        Probabilities weights = BayesUtil.bayesEpochs(1, ex, params.getSmoothing());
+
+        //Then test for F1-score on the .test file
+        FScore score = BayesUtil.testFScore(weights, testFile);
+
+//Finally, print the result.
+        System.out.println("\n~~~~~~~~~~ RESULTS - BAYES ~~~~~~~~~~");
+        System.out.println("Best smoothing " + params.getSmoothing()
+                                   + " has values vs test:"
+                                   + "\nprecision: " + score.getPrecision()
+                                   + "\nrecall: " + score.getRecall()
+                                   + "\nfScore: " + score.getfScore());
     }
 }

@@ -39,6 +39,9 @@ class SimpleStochUtil
                         }
                         usedFiles[j - found] = crosses[j];
                     }
+
+                    //A new set is to be trained, so clear out the old.
+                    Example.resetAllKeys();
                     //Read the examples from the chosen files
                     ArrayList<Example> ex = GeneralUtil.readExamples(usedFiles);
 

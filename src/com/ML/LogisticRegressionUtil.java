@@ -39,6 +39,8 @@ public class LogisticRegressionUtil
                         usedFiles[j - found] = crosses[j];
                     }
 
+                    //A new set is to be trained, so clear out the old.
+                    Example.resetAllKeys();
                     //Read the examples from the chosen files
                     ArrayList<Example> ex = GeneralUtil.readExamples(usedFiles);
 
@@ -83,6 +85,8 @@ public class LogisticRegressionUtil
     static Weight LREpochs(int epochs, ArrayList<Example> examples,
                            double startLearnRate, double tradeoff)
     {
+
+
         Weight weights = new Weight();
 
         return LREpochs(epochs, examples, weights, startLearnRate, tradeoff);
@@ -149,7 +153,7 @@ public class LogisticRegressionUtil
                     x = 0.0;
 
                 //double newWeight = w - decayedRate * ( (1 / (Math.log(1 + Math.exp(-y * w * x))))
-                 //       + Math.exp(-y * w * x) + (-y * x) + (2 * w / tradeoff * tradeoff));
+                //       + Math.exp(-y * w * x) + (-y * x) + (2 * w / tradeoff * tradeoff));
 
                 double newWeight = w + decayedRate * y * tradeoff * x;
 

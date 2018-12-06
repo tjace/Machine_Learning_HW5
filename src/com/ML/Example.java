@@ -1,5 +1,7 @@
 package com.ML;
 
+import javafx.util.Pair;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +16,7 @@ class Example
 
     private boolean label;
     private HashMap<String, Double> features;
-    private static HashSet<String> allKeys;
+    private static HashMap<String, Set<Double>> allKeys;
 
     Example(String fullLine)
     {
@@ -36,15 +38,31 @@ class Example
                 default:
                     String[] splits = each.split(":"); //key:value
                     features.put(splits[0], Double.parseDouble(splits[1]));
-                    allKeys.add(splits[0]);
+                    //Make sure allKeys has this fature-value, and also feature-0.0
+                    addToAllKeys(splits[0], Double.parseDouble(splits[1]));
+                    addToAllKeys(splits[0], 0.0);
             }
         }
+    }
+
+    /**
+     * Ensure that allKeys has the feature and value stored
+     *
+     * @param feature
+     * @param value
+     */
+    private void addToAllKeys(String feature, double value)
+    {
+        if (!allKeys.containsKey(feature))
+            allKeys.put(feature, new HashSet<>());
+        allKeys.get(feature).add(value);
+        return;
     }
 
 
     Double get(String n)
     {
-        return features.get(n);
+        return features.getOrDefault(n, 0.0);
     }
 
     boolean getLabel()
@@ -70,13 +88,30 @@ class Example
         if (allKeys != null)
             allKeys.clear();
         else
-            allKeys = new HashSet<>();
+            allKeys = new HashMap<>();
     }
 
     static Set<String> getAllKeys()
     {
-        return allKeys;
+        return allKeys.keySet();
     }
+
+    static Set<Pair<String, Double>> getAllPossibilities()
+    {
+        HashSet<Pair<String, Double>> ret = new HashSet<>();
+
+        for (String feat : allKeys.keySet())
+        {
+            for (double value : allKeys.get(feat))
+            {
+                ret.add(new Pair<>(feat, value));
+            }
+        }
+
+        return ret;
+    }
+
+
 }
 
 
