@@ -13,6 +13,9 @@ public class Main
     private static final double[] LRrates = new double[]{1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001};
     private static final double[] LRtradeoffs = new double[]{0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0};
 
+    //Hyper parameter choices for Naive Bayes
+    private static final double[] NBsmoothings = new double []{2.0, 1.5, 1.0, 0.5};
+
     //Test and training data
     private static final String trainFile = "src/data/train.liblinear";
     private static final String testFile = "src/data/test.liblinear";
@@ -36,8 +39,14 @@ public class Main
         //Logistic Regression classifier created with stochastic gradient descent
         //
         logisticRegression();
-
+        
+        //
+        //Naive Bayes
+        //
+        naiveBayes();
+    
     }
+
 
     /**
      * Run simple stochastic SVM with sub-gradients:
@@ -93,5 +102,11 @@ public class Main
                                    + "\nprecision: " + score.getPrecision()
                                    + "\nrecall: " + score.getRecall()
                                    + "\nfScore: " + score.getfScore());
+    }
+
+    private static void naiveBayes()
+    {
+        
+
     }
 }
