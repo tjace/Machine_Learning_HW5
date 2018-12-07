@@ -11,7 +11,7 @@ public class SVMParams {
     /**
      * Create a new SVMParams object.
      *
-     * @param _learnRate    The learning rate
+     * @param _learnRate The learning rate
      * @param _lossTradeoff The tradeoff, C
      */
     public SVMParams(double _learnRate, double _lossTradeoff) {
@@ -21,18 +21,22 @@ public class SVMParams {
     }
 
     /**
+     *
      * @return the learning rate
      */
-    double getLearnRate() {
+    double getLearnRate()
+    {
         return learnRate;
     }
 
     /**
      * @return the loss tradeoff, C
      */
-    double getLossTradeoff() {
+    double getLossTradeoff()
+    {
         return lossTradeoff;
     }
+
 
 
 }

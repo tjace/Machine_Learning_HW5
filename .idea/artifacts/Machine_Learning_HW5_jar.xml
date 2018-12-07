@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Machine Learning HW5:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Machine_Learning_HW5_jar</output-path>
+    <root id="archive" name="Machine Learning HW5.jar">
+      <element id="module-output" name="Machine Learning HW5" />
+    </root>
+  </artifact>
+</component>

@@ -20,8 +20,8 @@ class Example
 
     Example(String fullLine)
     {
-        String[] pieces = fullLine.split(" ");
         features = new HashMap<>();
+        String[] pieces = fullLine.split(" ");
 
         for (String each : pieces)
         {
@@ -44,6 +44,26 @@ class Example
             }
         }
     }
+
+    /**
+     * Creates a new empty example, to be built piece by piece.
+     */
+    Example()
+    {
+        features = new HashMap<>();
+    }
+
+    /**
+     * Adds a new feature-value pair to this Example, and all Examples' static memory
+     * @param _key feature
+     * @param _value value
+     */
+    void add(String _key, double _value)
+    {
+        features.put(_key, _value);
+        addToAllKeys(_key, _value);
+    }
+
 
     /**
      * Ensure that allKeys has the feature and value stored
@@ -109,6 +129,11 @@ class Example
         }
 
         return ret;
+    }
+
+    static Set<Double> getAllValuesOfFeature(String key)
+    {
+        return allKeys.get(key);
     }
 
 
