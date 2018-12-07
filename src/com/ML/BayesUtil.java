@@ -83,9 +83,6 @@ public class BayesUtil
     static Probabilities bayesEpochs(int epochs, ArrayList<Example> examples,
                                      double smoothing)
     {
-        //A new set is to be trained, so clear out the old.
-        Example.resetAllKeys();
-
         Probabilities weights = new Probabilities();
 
         return bayesEpochs(epochs, examples, weights, smoothing);
@@ -104,18 +101,15 @@ public class BayesUtil
                                              double smoothing)
     {
 
+        Collections.shuffle(examples);
 
-        for (int i = 1; i < epochs + 1; i++)
-        {
-            Collections.shuffle(examples);
-
-            //No need to reassign to weights,
-            // since it is changed within the method.
-            bayesEpoch(examples, weights, smoothing);
+        //No need to reassign to weights,
+        // since it is changed within the method.
+        bayesEpoch(examples, weights, smoothing);
 
 //            if (isTrain)
 //                GeneralUtil.testVsDev(i + 1, weights);
-        }
+
 
         return weights;
     }
@@ -137,6 +131,8 @@ public class BayesUtil
             double value = eachPair.getValue();
             double chance = findLikelihood(examples, feat, value, true, smoothing);
             weights.put(feat, value, chance);
+            double negChance = findLikelihood(examples, feat, value, false, smoothing);
+            weights.put("-" + feat, value, negChance);
         }
 
         //Store the prior into the weights as well
@@ -206,6 +202,7 @@ public class BayesUtil
     private static boolean sgn(Probabilities weights, Example eachEx)
     {
         double total = 1.0;
+        double totalNeg = 1.0;
 
         for (String eachFeature : Example.getAllKeys())
         {
@@ -216,13 +213,16 @@ public class BayesUtil
                 value = 0.0;
 
             double thisChance = weights.get(eachFeature, value);
+            double thisNegChance = weights.get("-" + eachFeature, value);
 
             total *= thisChance;
+            totalNeg *= thisNegChance;
         }
 
         double totalChance = total * weights.getPrior();
-
-        return (totalChance >= 0.5);
+        double totalNegChance = totalNeg * (1 - weights.getPrior());
+        boolean ret = (totalChance >= totalNegChance);
+        return ret;
     }
 
     /**
@@ -271,6 +271,7 @@ public class BayesUtil
             }
         }
 
-        return (numTrue + smoothing) / (numLabelMatch + (smoothing * examples.size()));
+        double likelihood = (numTrue + smoothing) / (numLabelMatch + (smoothing * examples.size()));
+        return likelihood;
     }
 }

@@ -14,7 +14,7 @@ public class Main
     private static final double[] LRtradeoffs = new double[]{0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0};
 
     //Hyper parameter choices for Naive Bayes
-    private static final double[] bayesSmoothings = new double[]{2.0, 1.5, 1.0, 0.5};
+    private static final double[] bayesSmoothings = new double[]{0.0, 2.0, 1.5, 1.0, 0.5};
 
     //Test and training data
     private static final String trainFile = "src/data/train.liblinear";
@@ -43,8 +43,12 @@ public class Main
         //
         //Naive Bayes
         //
-        naiveBayes();
+        //naiveBayes();
 
+        //
+        //SVM over trees
+        //
+        SVMTrees();
     }
 
 
@@ -124,5 +128,18 @@ public class Main
                                    + "\nprecision: " + score.getPrecision()
                                    + "\nrecall: " + score.getRecall()
                                    + "\nfScore: " + score.getfScore());
+    }
+
+    /**
+     * First, create a list of 200 trees of small depth
+     * Then, run each example through the trees and get their outputs
+     * Finally, run SVM
+     */
+    private static void SVMTrees()
+    {
+        //First, create the list of trees from the training file
+
+
+
     }
 }

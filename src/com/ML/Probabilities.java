@@ -10,7 +10,8 @@ import java.util.concurrent.ThreadLocalRandom;
 class Probabilities {
 
     private HashMap<Pair<String, Double>, Double> weights;
-    private static HashMap<Pair<String, Double>, Double> allWeights;
+    private HashMap<Pair<String, Double>, Double> negWeights;
+
     private double prior;
 
     Probabilities() {
@@ -23,7 +24,7 @@ class Probabilities {
 
         if (!this.hasKey(key))
             this.put(key, ThreadLocalRandom.current().nextDouble(0.0, 0.01));
-        return weights.get(feature);
+        return weights.get(key);
     }
 
     void put(String feature, double value, double probability) {
