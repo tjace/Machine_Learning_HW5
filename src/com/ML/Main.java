@@ -2,6 +2,7 @@ package com.ML;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("Duplicates")
 public class Main
 {
 
@@ -30,6 +31,19 @@ public class Main
     private static final String[] crosses = new String[]{
             "src/data/CVSplits/training00.data", "src/data/CVSplits/training01.data", "src/data/CVSplits/training02.data",
             "src/data/CVSplits/training03.data", "src/data/CVSplits/training04.data"};
+
+
+    //Files for the final project (kaggle)
+    private static final String[] finalCrosses = new String[]{
+            "src/finalFiles/test01", "src/finalFiles/test02", "src/finalFiles/test03",
+            "src/finalFiles/test04", "src/finalFiles/test05"};
+    private static final String finalTrain = "src/finalFiles/data.train";
+    private static final String finalTest = "src/finalFiles/data.test";
+    private static final String finalEval = "src/finalFiles/data.eval.anon";
+    private static final String finalEvalIDs = "src/finalFiles/data.eval.anon.id";
+    private static final String finalStochOutput = "src/finalFiles/outputStoch";
+    private static final String finalBayesOutput = "src/finalFiles/outputBayes";
+
 
     /**
      * Here we go, the main shebang.
@@ -136,7 +150,7 @@ public class Main
         //Then test for F1-score on the .test file
         FScore score = BayesUtil.testFScore(weights, testFile);
 
-//Finally, print the result.
+        //Finally, print the result.
         System.out.println("\n~~~~~~~~~~ RESULTS - BAYES ~~~~~~~~~~");
         System.out.println("Best smoothing " + params.getSmoothing()
                                    + " has values vs test:"
@@ -183,7 +197,76 @@ public class Main
      * This method runs two algorithms (Stoch Sub-Gradient and Naive Bayes)
      * and outputs two files with predictions.
      */
-    private static void kaggle()
+    private static void kaggle() throws Exception
     {
+        //First, we'll do Stochastic Sub-Gradient Descent
+        kaggleStoch();
+
+        //Then, we'll do Naive Bayes
+        kaggleBayes();
+    }
+
+    /**
+     * Runs the Stoch Sub-Gradient for my final project, and outputs a text file containing guesses on the eval file.
+     */
+    private static void kaggleStoch() throws Exception
+    {
+        //First, cross validate for the best hyper-params
+        SVMParams params = SimpleStochUtil.SVMCrossValidate(finalCrosses, SVMrates, SVMlosses);
+
+        //With best params, train a new weightset on the .train file 20x
+        //A new set is to be trained, so clear out the old.
+        Example.resetAllKeys();
+        ArrayList<Example> ex = GeneralUtil.readExamples(finalTrain);
+        Weight weights = SimpleStochUtil.stochEpochs(20, ex, params.getLearnRate(), params.getLossTradeoff());
+
+        //then test for F1-score on the .test file.
+        FScore score = SimpleStochUtil.testFScore(weights, finalTest);
+
+        //Print the result for the test file
+        System.out.println("\n~~~~~~~~~~ KAGGLE RESULTS - SVM ~~~~~~~~~~");
+        System.out.println("Best rate " + params.getLearnRate()
+                                   + " + loss " + params.getLossTradeoff() + " has values vs test:"
+                                   + "\nprecision: " + score.getPrecision()
+                                   + "\nrecall: " + score.getRecall()
+                                   + "\nfScore: " + score.getfScore() + "\n");
+
+        //Finally, guess on the eval file, and print to another file the guesses.
+        ArrayList<Example> finalEvalExamples = GeneralUtil.readExamples(finalEval);
+        SimpleStochUtil.printTestGuesses(weights, finalEvalExamples, finalEvalIDs, finalStochOutput);
+
+        System.out.println("~~~~~~~~~~ BAYES FINAL DONE ~~~~~~~~~~\n\n\n");
+    }
+
+    /**
+     * Runs Naive Bayes for my final project, and outputs a text file containing guesses on the eval file.
+     */
+    private static void kaggleBayes() throws Exception
+    {
+        //First, cross validate for the best hyper params
+        BayesParams params = BayesUtil.bayesCrossValidate(finalCrosses, bayesSmoothings);
+
+        //A new set is to be trained, so clear out the old.
+        Example.resetAllKeys();
+        ArrayList<Example> ex = GeneralUtil.readExamples(finalTrain);
+
+        //With the best params, train a set of probabilities on the train file
+        Probabilities weights = BayesUtil.bayesEpochs(1, ex, params.getSmoothing());
+
+        //Then test for F1-score on the .test file
+        FScore score = BayesUtil.testFScore(weights, finalTest);
+
+        //Print the result for the
+        System.out.println("\n~~~~~~~~~~ KAGGELE RESULTS - BAYES ~~~~~~~~~~");
+        System.out.println("Best smoothing " + params.getSmoothing()
+                                   + " has values vs test:"
+                                   + "\nprecision: " + score.getPrecision()
+                                   + "\nrecall: " + score.getRecall()
+                                   + "\nfScore: " + score.getfScore() + "\n");
+
+        //Finally, guess on the eval file, and print to another file the guesses.
+        ArrayList<Example> finalEvalExamples = GeneralUtil.readExamples(finalEval);
+        BayesUtil.printTestGuesses(weights, finalEvalExamples, finalEvalIDs, finalBayesOutput);
+        System.out.println("~~~~~~~~~~ BAYES FINAL DONE ~~~~~~~~~~\n\n\n");
     }
 }

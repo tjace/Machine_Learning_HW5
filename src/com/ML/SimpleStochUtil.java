@@ -1,5 +1,7 @@
 package com.ML;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -268,5 +270,55 @@ class SimpleStochUtil
     private static boolean sgn(Weight weights, Example ex)
     {
         return (sgnDouble(weights, ex) >= 0);
+    }
+
+    static void printTestGuesses(Weight weights, ArrayList<Example> evalExamples, String evalIDFile, String outputFile) throws Exception {
+
+        //This is what will write the output.
+        PrintWriter writer = new PrintWriter(outputFile, StandardCharsets.UTF_8);
+        writer.println("example_id,label");
+
+        //This is for reading the IDs file
+        BufferedReader evalReader = null;
+        String IDLine;
+        int lineNumber = 1;
+
+        try {
+            evalReader = new BufferedReader(new FileReader(evalIDFile));
+
+            for (Example ex : evalExamples) {
+                //Grab the example's ID (they are in order)
+                IDLine = evalReader.readLine();
+                String postLine;
+                lineNumber++;
+
+                boolean guess = sgn(weights, ex);
+                if (guess)
+                    postLine = IDLine + "," + "1";
+                else
+                    postLine = IDLine + "," + "0";
+                System.out.println("Line " + lineNumber + ": " + postLine);
+                writer.println(postLine);
+            }
+
+        } catch (
+                FileNotFoundException e) {
+            System.out.println("File " + evalIDFile + " not found.");
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        } finally {
+            writer.close();
+
+            if (evalReader != null) {
+                try {
+                    evalReader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
     }
 }
