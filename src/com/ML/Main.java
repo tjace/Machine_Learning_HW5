@@ -39,22 +39,30 @@ public class Main
         //
         // simple stochastic sub-gradient descent version algorithm SVM
         //
-        simpleStochastic();
+        //simpleStochastic();
 
         //
         //Logistic Regression classifier created with stochastic gradient descent
         //
-        logisticRegression();
+        //logisticRegression();
 
         //
         //Naive Bayes
         //
-        naiveBayes();
+        //naiveBayes();
 
         //
         //SVM over trees
         //
-        SVMTrees();
+        //SVMTrees();
+
+
+        //
+        //Final Project runs
+        //Includes naive Bayes and simple stochastic types.
+        //
+        kaggle();
+
     }
 
 
@@ -169,5 +177,13 @@ public class Main
                                    + "\nprecision: " + score.getPrecision()
                                    + "\nrecall: " + score.getRecall()
                                    + "\nfScore: " + score.getfScore() + "\n\n\n");
+    }
+
+    /**
+     * This method runs two algorithms (Stoch Sub-Gradient and Naive Bayes)
+     * and outputs two files with predictions.
+     */
+    private static void kaggle()
+    {
     }
 }
