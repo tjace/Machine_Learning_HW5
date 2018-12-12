@@ -18,8 +18,21 @@ class Example
     private HashMap<String, Double> features;
     private static HashMap<String, Set<Double>> allKeys;
 
+    /**
+     * Create a new example based on this read-in line.
+     */
     Example(String fullLine)
     {
+        this(fullLine, false);
+    }
+
+    /**
+     * Rather than storing a value for each feature, stores 1.0 for all values present
+     * (assuming presence is true)
+     */
+    Example(String fullLine, boolean presence)
+    {
+
         features = new HashMap<>();
         String[] pieces = fullLine.split(" ");
 
@@ -37,12 +50,25 @@ class Example
                     break;
                 default:
                     String[] splits = each.split(":"); //key:value
-                    features.put(splits[0], Double.parseDouble(splits[1]));
-                    //Make sure allKeys has this fature-value, and also feature-0.0
-                    addToAllKeys(splits[0], Double.parseDouble(splits[1]));
-                    addToAllKeys(splits[0], 0.0);
+
+                    if (!presence)
+                    {
+                        features.put(splits[0], Double.parseDouble(splits[1]));
+                        //Make sure allKeys has this feature-value, and also feature-0.0
+                        addToAllKeys(splits[0], Double.parseDouble(splits[1]));
+                        addToAllKeys(splits[0], 0.0);
+                    }
+                    else //If presence mode on, map all present features to 1.0.
+                    {
+                        features.put(splits[0], 1.0);
+                        //Make sure allKeys has this feature-1.0, and also feature-0.0
+                        addToAllKeys(splits[0], 1.0);
+                        addToAllKeys(splits[0], 0.0);
+                    }
             }
         }
+
+
     }
 
     /**
@@ -55,7 +81,8 @@ class Example
 
     /**
      * Adds a new feature-value pair to this Example, and all Examples' static memory
-     * @param _key feature
+     *
+     * @param _key   feature
      * @param _value value
      */
     void add(String _key, double _value)

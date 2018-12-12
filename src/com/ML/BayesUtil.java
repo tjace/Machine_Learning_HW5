@@ -12,6 +12,11 @@ public class BayesUtil
 {
     public static BayesParams bayesCrossValidate(String[] crosses, double[] smoothings)
     {
+        return bayesCrossValidate(crosses, smoothings, false);
+    }
+
+    public static BayesParams bayesCrossValidate(String[] crosses, double[] smoothings, boolean presence)
+    {
         double bestSmoothing = -1.0;
         FScore bestFScore = null;
 
@@ -42,7 +47,7 @@ public class BayesUtil
                 //A new set is to be trained, so clear out the old.
                 Example.resetAllKeys();
                 //Read the examples from the chosen files
-                ArrayList<Example> ex = GeneralUtil.readExamples(usedFiles);
+                ArrayList<Example> ex = GeneralUtil.readExamples(usedFiles, presence);
 
                 //Using the rate + loss for this run, epoch 10x over the targets
                 Probabilities weights = bayesEpochs(1, ex, smoothing);

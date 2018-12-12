@@ -118,6 +118,7 @@ class SimpleStochUtil
             // since it is changed within the method.
             stochEpoch(examples, weights, decayedRate, loss);
 
+            ;
 //            if (isTrain)
 //                GeneralUtil.testVsDev(i + 1, weights);
         }
@@ -132,8 +133,13 @@ class SimpleStochUtil
      */
     private static void stochEpoch(ArrayList<Example> examples, Weight weights, double decayedRate, double loss)
     {
+        int count = 0;
+        int max = examples.size();
         for (Example ex : examples)
         {
+            count++;
+            System.out.println(count + " / " + max);
+
             boolean sign = sgn(weights, ex);
             boolean actual = ex.getLabel();
 

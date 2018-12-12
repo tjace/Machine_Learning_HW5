@@ -16,15 +16,18 @@ class GeneralUtil {
      * @param files the files to read for the Examples
      * @return an ArrayList full of the examples from all given files
      */
-    static ArrayList<Example> readExamples(String[] files) {
+    static ArrayList<Example> readExamples(String[] files, boolean presence) {
         ArrayList<Example> ret = new ArrayList<>();
 
         for (String file : files) {
-            ArrayList<Example> part = readExamples(file);
+            ArrayList<Example> part = readExamples(file, presence);
             ret.addAll(part);
         }
 
         return ret;
+    }
+    static ArrayList<Example> readExamples(String[] files) {
+        return readExamples(files, false);
     }
 
 
@@ -34,7 +37,7 @@ class GeneralUtil {
      * @param fileName where the Example lines are read from
      * @return an ArrayList of read examples
      */
-    static ArrayList<Example> readExamples(String fileName) {
+    static ArrayList<Example> readExamples(String fileName, boolean presence) {
         ArrayList<Example> ret = new ArrayList<>();
 
         BufferedReader reader = null;
@@ -45,7 +48,7 @@ class GeneralUtil {
             reader = new BufferedReader(new FileReader(fileName));
 
             while ((line = reader.readLine()) != null) {
-                Example next = new Example(line);
+                Example next = new Example(line, presence);
                 ret.add(next);
             }
 
@@ -67,6 +70,9 @@ class GeneralUtil {
         }
 
         return ret;
+    }
+    static ArrayList<Example> readExamples(String fileName) {
+        return readExamples(fileName, false);
     }
 
     static Double smallRandom() {

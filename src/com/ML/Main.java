@@ -5,6 +5,7 @@ import java.util.ArrayList;
 @SuppressWarnings("Duplicates")
 public class Main
 {
+    static boolean DEBUG = true;
 
     //Hyper parameter choices for SVM
     private static final double[] SVMrates = new double[]{1.0, 0.1, 0.01, 0.001, 0.0001};
@@ -35,8 +36,8 @@ public class Main
 
     //Files for the final project (kaggle)
     private static final String[] finalCrosses = new String[]{
-            "src/finalFiles/test01", "src/finalFiles/test02", "src/finalFiles/test03",
-            "src/finalFiles/test04", "src/finalFiles/test05"};
+            "src/finalFiles/test splits/test01", "src/finalFiles/test splits/test02", "src/finalFiles/test splits/test03",
+            "src/finalFiles/test splits/test04", "src/finalFiles/test splits/test05"};
     private static final String finalTrain = "src/finalFiles/data.train";
     private static final String finalTest = "src/finalFiles/data.test";
     private static final String finalEval = "src/finalFiles/data.eval.anon";
@@ -53,7 +54,7 @@ public class Main
         //
         // simple stochastic sub-gradient descent version algorithm SVM
         //
-        //simpleStochastic();
+        simpleStochastic();
 
         //
         //Logistic Regression classifier created with stochastic gradient descent
@@ -212,15 +213,20 @@ public class Main
     private static void kaggleStoch() throws Exception
     {
         //First, cross validate for the best hyper-params
-        SVMParams params = SimpleStochUtil.SVMCrossValidate(finalCrosses, SVMrates, SVMlosses);
+        SVMParams params = bestSVMparams;
+        if(DEBUG) System.out.println("~~~~~~~~~~ (stoch) after cross-validation ~~~~~~~~~~\n\n\n");
+
 
         //With best params, train a new weightset on the .train file 20x
         //A new set is to be trained, so clear out the old.
         Example.resetAllKeys();
         ArrayList<Example> ex = GeneralUtil.readExamples(finalTrain);
+        if(DEBUG) System.out.println("~~~~~~~~~~ after read examples ~~~~~~~~~~\n\n\n");
+
         Weight weights = SimpleStochUtil.stochEpochs(20, ex, params.getLearnRate(), params.getLossTradeoff());
 
         //then test for F1-score on the .test file.
+        if(DEBUG) System.out.println("~~~~~~~~~~ checking f-score on test... ~~~~~~~~~~\n\n\n");
         FScore score = SimpleStochUtil.testFScore(weights, finalTest);
 
         //Print the result for the test file
@@ -244,11 +250,11 @@ public class Main
     private static void kaggleBayes() throws Exception
     {
         //First, cross validate for the best hyper params
-        BayesParams params = BayesUtil.bayesCrossValidate(finalCrosses, bayesSmoothings);
+        BayesParams params = BayesUtil.bayesCrossValidate(finalCrosses, bayesSmoothings, true);
 
         //A new set is to be trained, so clear out the old.
         Example.resetAllKeys();
-        ArrayList<Example> ex = GeneralUtil.readExamples(finalTrain);
+        ArrayList<Example> ex = GeneralUtil.readExamples(finalTrain, true);
 
         //With the best params, train a set of probabilities on the train file
         Probabilities weights = BayesUtil.bayesEpochs(1, ex, params.getSmoothing());
