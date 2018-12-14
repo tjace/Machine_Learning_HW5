@@ -42,8 +42,11 @@ public class Main
     private static final String finalTest = "src/finalFiles/data.test";
     private static final String finalEval = "src/finalFiles/data.eval.anon";
     private static final String finalEvalIDs = "src/finalFiles/data.eval.anon.id";
+
     private static final String finalStochOutput = "src/finalFiles/outputStoch";
     private static final String finalBayesOutput = "src/finalFiles/outputBayes";
+    private static final String finalTreesOutput = "src/finalFiles/outputTrees";
+
 
 
     /**
@@ -76,7 +79,9 @@ public class Main
         //Final Project runs
         //Includes naive Bayes and simple stochastic types.
         //
-        kaggle();
+        kaggleStoch();
+        kaggleBayes();
+        kaggleForest();
 
     }
 
@@ -274,5 +279,38 @@ public class Main
         ArrayList<Example> finalEvalExamples = GeneralUtil.readExamples(finalEval);
         BayesUtil.printTestGuesses(weights, finalEvalExamples, finalEvalIDs, finalBayesOutput);
         System.out.println("~~~~~~~~~~ BAYES FINAL DONE ~~~~~~~~~~\n\n\n");
+    }
+
+
+    /**
+     * For the final project:
+     * - feature transform for presence rather than count
+     * - create random forest
+     * - sgn found from counting +/- labels
+     */
+    private static void kaggleForest() throws Exception
+    {
+        int bestDepth = 8;
+
+        //First, create the list of trees from the training file
+        ArrayList<Node> trees = TreeUtil.createTrees(finalTrain, bestDepth, true);
+
+        //Then test for F1-score on the .test file
+        FScore score = TreeUtil.testFScore(trees, finalTest);
+
+        //Print the result for the
+        System.out.println("\n~~~~~~~~~~ KAGGELE RESULTS - BAYES ~~~~~~~~~~");
+        System.out.println("Best depth: " + bestDepth
+                                   + " has values vs test:"
+                                   + "\nprecision: " + score.getPrecision()
+                                   + "\nrecall: " + score.getRecall()
+                                   + "\nfScore: " + score.getfScore() + "\n");
+
+        //Finally, guess on the eval file, and print to another file the guesses.
+        ArrayList<Example> finalEvalExamples = GeneralUtil.readExamples(finalEval, true);
+        TreeUtil.printTestGuesses(trees, finalEvalExamples, finalEvalIDs, finalTreesOutput);
+        System.out.println("~~~~~~~~~~ TREES FINAL DONE ~~~~~~~~~~\n\n\n");
+
+
     }
 }

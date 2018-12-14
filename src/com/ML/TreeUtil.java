@@ -1,18 +1,31 @@
 package com.ML;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
+@SuppressWarnings("Duplicates")
 public class TreeUtil
 {
-    public static ArrayList<Node> createTrees(String file, int depth) throws Exception
+    /**
+     * Creates 200 trees, each set constructed from 10% of the original file
+     *
+     * @param file
+     * @param depth
+     * @return
+     * @throws Exception
+     */
+    public static ArrayList<Node> createTrees(String file, int depth, boolean presence) throws Exception
     {
         //Read all examples, and also fill in all possible feature-value pairs
         Example.resetAllKeys();
-        ArrayList<Example> examples = GeneralUtil.readExamples(file);
+        ArrayList<Example> examples = GeneralUtil.readExamples(file, presence);
 
         ArrayList<Node> nodes = new ArrayList<>(200);
+        HashSet<String> usedFeats = new HashSet<>(200);
+
 
         for (int i = 0; i < 200; i++)
         {
@@ -20,16 +33,24 @@ public class TreeUtil
             ArrayList<Example> using = getRandoms(examples, 0.1);
 
             //This travel-size list of features is used by ID3
-            HashSet<String> feats = new HashSet<>(Example.getAllKeys());
+            HashSet<String> feats = new HashSet<>(Example.getSomeKeys());
+            //Don't look at any features that have already been featured as pivots
+            feats.removeAll(usedFeats);
 
             //Construct the tree and return the root
             Node root = TreeUtil.ID3(using, feats, 1, depth);
 
             nodes.add(root);
+            usedFeats.addAll(root.getAllNames());
 
         }
 
         return nodes;
+    }
+
+    public static ArrayList<Node> createTrees(String file, int depth) throws Exception
+    {
+        return createTrees(file, depth, false);
     }
 
     /**
@@ -337,7 +358,7 @@ public class TreeUtil
 
 
     /**
-     * Returns the tree's guess for the example.
+     * Returns one tree's guess for the example.
      */
     static boolean sgn(Node root, Example ex) throws Exception
     {
@@ -346,7 +367,6 @@ public class TreeUtil
 
         while (!currentNode.isLeaf())
         {
-
             int nextPath;
             if (ex.hasKey(currentNode.name))
                 nextPath = (ex.get(currentNode.name)).intValue();
@@ -354,12 +374,138 @@ public class TreeUtil
                 nextPath = 0;
 
             //debug.append(currentNode.name).append(": ").append(nextPath).append(" ==> ");
+            if(currentNode.followPath(nextPath) == null)
+                System.out.println("why");
 
             currentNode = currentNode.followPath(nextPath);
+
         }
 
         //debug.append(currentNode.name);
         //System.out.println(debug + "");
         return currentNode.getLabel();
+    }
+
+    /**
+     * Returns the average of many trees' guesses for the example.
+     */
+    static boolean sgn(ArrayList<Node> roots, Example ex) throws Exception
+    {
+        int pos = 0;
+        int neg = 0;
+
+        for (Node each : roots)
+        {
+            if (sgn(each, ex))
+                pos++;
+            else neg++;
+        }
+
+        if (pos >= neg)
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Returns an FScore, given a set of weights
+     *
+     * @return an FScore object, holding precision, recall and the actual fScore
+     */
+    static FScore testFScore(ArrayList<Node> weights, String testFile) throws Exception
+    {
+        double precision;
+        double recall;
+        double fScore;
+
+        double truePos = 0.0;
+        double falsePos = 0.0;
+        double falseNeg = 0.0;
+
+        ArrayList<Example> testExamples = GeneralUtil.readExamples(testFile, true);
+
+        for (Example eachEx : testExamples)
+        {
+
+            boolean guess = sgn(weights, eachEx);
+            boolean actual = eachEx.getLabel();
+
+            if (guess != actual)
+            {
+                if (guess)
+                    falsePos++;
+                else
+                    falseNeg++;
+            }
+            else
+            {
+                if (guess) //Guess == actual ==true
+                    truePos++;
+            }
+        }
+
+        if ((truePos + falsePos) != 0)
+            precision = truePos / (truePos + falsePos);
+        else
+            precision = 0;
+
+        if ((truePos + falseNeg) != 0)
+            recall = truePos / (truePos + falseNeg);
+        else
+            recall = 0;
+
+        FScore score_obj = new FScore(precision, recall);
+
+        return score_obj;
+    }
+
+    static void printTestGuesses(ArrayList<Node> trees, ArrayList<Example> evalExamples, String evalIDFile, String outputFile) throws Exception {
+
+        //This is what will write the output.
+        PrintWriter writer = new PrintWriter(outputFile, StandardCharsets.UTF_8);
+        writer.println("example_id,label");
+
+        //This is for reading the IDs file
+        BufferedReader evalReader = null;
+        String IDLine;
+        int lineNumber = 1;
+
+        try {
+            evalReader = new BufferedReader(new FileReader(evalIDFile));
+
+            for (Example ex : evalExamples) {
+                //Grab the example's ID (they are in order)
+                IDLine = evalReader.readLine();
+                String postLine;
+                lineNumber++;
+
+                boolean guess = sgn(trees, ex);
+                if (guess)
+                    postLine = IDLine + "," + "1";
+                else
+                    postLine = IDLine + "," + "0";
+                System.out.println("Line " + lineNumber + ": " + postLine);
+                writer.println(postLine);
+            }
+
+        } catch (
+                FileNotFoundException e) {
+            System.out.println("File " + evalIDFile + " not found.");
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        } finally {
+            writer.close();
+
+            if (evalReader != null) {
+                try {
+                    evalReader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
     }
 }

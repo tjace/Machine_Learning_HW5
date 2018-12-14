@@ -188,6 +188,11 @@ class SimpleStochUtil
 
     }
 
+    /**
+     * Returns an FScore, given a set of weights
+     *
+     * @return an FScore object, holding precision, recall and the actual fScore
+     */
     static FScore testFScore(Weight weights, String testFile)
     {
         double precision;
@@ -197,7 +202,6 @@ class SimpleStochUtil
         double truePos = 0.0;
         double falsePos = 0.0;
         double falseNeg = 0.0;
-
 
         ArrayList<Example> testExamples = GeneralUtil.readExamples(testFile);
 

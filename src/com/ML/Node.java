@@ -1,6 +1,7 @@
 package com.ML;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 class Node
 {
@@ -12,7 +13,8 @@ class Node
     private boolean leaf;
     private HashMap<Integer, Node> children;
 
-    Node(String _name, int _depth, boolean _leaf) {
+    Node(String _name, int _depth, boolean _leaf)
+    {
 
         leaf = _leaf;
         name = _name;
@@ -22,24 +24,29 @@ class Node
     }
 
     //Adds a child. Check == which answer is given to this node to go to that child
-    void add(int check, Node child) {
+    void add(int check, Node child)
+    {
         children.put(check, child);
     }
 
-    boolean isLeaf() {
+    boolean isLeaf()
+    {
         return leaf;
     }
 
-    Node followPath(int path) {
+    Node followPath(int path)
+    {
         return children.get(path);
     }
 
-    int findMaxDepth() {
+    int findMaxDepth()
+    {
         if (leaf)
             return depth;
 
         int max = 0;
-        for (Node each : children.values()) {
+        for (Node each : children.values())
+        {
             int eachDepth = each.findMaxDepth();
 
             if (eachDepth > max)
@@ -49,11 +56,13 @@ class Node
         return max;
     }
 
-    boolean getLabel() throws Exception {
+    boolean getLabel() throws Exception
+    {
         if (!leaf)
             throw new Exception("This is not a leaf node!\n");
 
-        switch (name) {
+        switch (name)
+        {
             case "+1":
                 return true;
             case "-1":
@@ -61,5 +70,19 @@ class Node
             default:
                 throw new Exception("Failed to get label: bad node name: " + name);
         }
+    }
+
+    HashSet<String> getAllNames()
+    {
+        HashSet<String> ret = new HashSet<String>();
+        if (!leaf)
+            ret.add(name);
+
+        for (Node child : children.values())
+        {
+            ret.addAll(child.getAllNames());
+        }
+
+        return ret;
     }
 }

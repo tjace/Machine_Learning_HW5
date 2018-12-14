@@ -2,9 +2,7 @@ package com.ML;
 
 import javafx.util.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * an Example's features array contains:
@@ -141,6 +139,17 @@ class Example
     static Set<String> getAllKeys()
     {
         return allKeys.keySet();
+    }
+
+    /**
+     * Returns a random third of the possible features as a list.
+     * @return
+     */
+    static List<String> getSomeKeys()
+    {
+        ArrayList<String> copy = new ArrayList<>(allKeys.keySet());
+        Collections.shuffle(copy);
+        return copy.subList(0, copy.size() / 2);
     }
 
     static Set<Pair<String, Double>> getAllPossibilities()
